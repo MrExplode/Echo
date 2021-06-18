@@ -40,6 +40,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 import javax.security.auth.login.LoginException;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -68,15 +69,16 @@ public class Echo {
         log.info("Loading terminal...");
         new Thread(() -> new ConsoleHandler().start()).start();
         log.info("Starting bot instance...");
-        Set<GatewayIntent> gateways = new HashSet<>();
-        gateways.add(GatewayIntent.GUILD_MEMBERS);
-        gateways.add(GatewayIntent.GUILD_BANS);
-        gateways.add(GatewayIntent.GUILD_EMOJIS);
-        gateways.add(GatewayIntent.GUILD_VOICE_STATES);
-        gateways.add(GatewayIntent.GUILD_MESSAGES);
-        gateways.add(GatewayIntent.GUILD_MESSAGE_REACTIONS);
-        gateways.add(GatewayIntent.DIRECT_MESSAGES);
-        val builder = JDABuilder.create(config.getToken(), gateways);
+        Set<GatewayIntent> intents = EnumSet.of(
+                GatewayIntent.GUILD_MEMBERS,
+                GatewayIntent.GUILD_BANS,
+                GatewayIntent.GUILD_EMOJIS,
+                GatewayIntent.GUILD_VOICE_STATES,
+                GatewayIntent.GUILD_MESSAGES,
+                GatewayIntent.GUILD_MESSAGE_REACTIONS,
+                GatewayIntent.DIRECT_MESSAGES
+        );
+        val builder = JDABuilder.create(config.getToken(), intents);
         builder.disableCache(CacheFlag.ACTIVITY, CacheFlag.CLIENT_STATUS, CacheFlag.ONLINE_STATUS);
         builder.setEventManager(new AnnotatedEventManager());
         builder.addEventListeners(new MiscListener());
@@ -102,7 +104,7 @@ public class Echo {
     private void onShutdown() {
         log.info("Shutting down JDA...");
         jda.shutdown();
-        log.info("Closing Discrd DB...");
+        log.info("Closing Discord DB...");
         discordDB.disconnect();
         log.info("Shutting down YouTube integration...");
         youtubeHandler.shutdown();
